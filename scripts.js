@@ -80,5 +80,17 @@ $("canvas").click(function(){
 });
 
 function createColorMapping(colorMap1, colorMap2) {
+	var colorMapping = [];
+	for (i = 0; i < 250; i++) {
+		if (colorMap1[i] != null && colorMap2[i] != null) {
+			colorMapping[i] = [colorMap1[i], colorMap2[i]];
+		}
+	}
+	return colorMapping
+}
 
+function testFunction() {
+	var CM1 = createColorMap("canvas1");
+	var CM2 = createColorMap("canvas2");
+	return createColorMapping(CM1, CM2);
 }
