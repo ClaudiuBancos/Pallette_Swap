@@ -83,10 +83,10 @@ function createColorMapping(colorMap1, colorMap2) {
 	var colorMapping = [];
 	for (i = 0; i < 250; i++) {
 		if (colorMap1[i] != null && colorMap2[i] != null) {
-			colorMapping[i] = [colorMap1[i], colorMap2[i]];
+			colorMapping[i] = [colorMap1[i][0], colorMap2[i][0]];
 		}
 	}
-	return colorMapping
+	return colorMapping;
 }
 
 function testFunction() {
