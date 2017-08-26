@@ -1,0 +1,26 @@
+* {
+	box-sizing: border-box;
+}
+
+.canvas_and_colors {
+	display: flex;
+	flex-direction: row;
+}
+
+.canvasDiv {
+	width: 100px;
+}
+
+
+.color_container {
+	font-size: 8px;
+	height: 95px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.color_container div {
+	width: 30%;
+	height: 19px;
+}
