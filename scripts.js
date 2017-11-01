@@ -1,7 +1,7 @@
 /* JS */
 
-$(document).ready(drawMyImage("BW/250.png", "canvas1"));
-$(document).ready(drawMyImage("BW/25.png", "canvas2"));
+$(document).ready(drawMyImage("BW/83.png", "canvas1"));
+$(document).ready(drawMyImage("BW/48.png", "canvas2"));
 
 
 
