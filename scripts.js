@@ -7,6 +7,9 @@ $(document).ready(drawMyImage("BW/48.png", "canvas2"));
 
 
 
+
+
+
 function drawMyImage(src, canvasID) {
 	var canvas = $("#" + canvasID)[0];
 	var ctx = canvas.getContext('2d');
@@ -17,6 +20,31 @@ function drawMyImage(src, canvasID) {
 	img.onload = function() {
 		ctx.drawImage(img, 0, 0);
 	}
+}
+
+function clearCanvas(canvasID) {
+	var canvas = $("#" + canvasID)[0];
+	var ctx = canvas.getContext('2d');
+
+	currentImageData = null;
+
+	for (x = 0; x < 96; x++) {
+		for (y = 0; y < 96; y++) {
+			var current_pixel = ctx.getImageData(x, y, 1, 1)
+			if (currentImageData == null) {
+				currentImageData = current_pixel;
+			} else {
+				ctx.putImageData(currentImageData, x, y);
+			};
+		};
+	};
+}
+
+function copyCanvas(srcCanvasID, destCanvasID) {
+	clearCanvas(destCanvasID);
+	var destCanvas = $("#" + destCanvasID)[0];
+	var ctx = destCanvas.getContext('2d');
+	ctx.drawImage($("#" + srcCanvasID)[0], 0, 0);
 }
 
 
@@ -102,13 +130,46 @@ function paletteSwap (receiverCanvasID, donorCanvasID) {
 }
 
 
+var currentMapping = null;
+
+function updateMapping (mapping, originalCanvasID, destinationCanvasID) {
+	
+	copyCanvas(originalCanvasID, destinationCanvasID);
+
+	var swapMapping = currentMapping;
+
+	var receivingCanvas = $("#" + destinationCanvasID)[0];
+	var ctx = receivingCanvas.getContext('2d');
+
+	for (x = 0; x < 96; x++) {
+		for (y = 0; y < 96; y++) {
+			var current_pixel = ctx.getImageData(x, y, 1, 1)
+			
+			var newImageData = current_pixel;
+
+			for (i = 0; i < swapMapping.length; i++) {
+				if (swapMapping[i][0].data[0] == current_pixel.data[0] && swapMapping[i][0].data[1] == current_pixel.data[1] && swapMapping[i][0].data[2] == current_pixel.data[2] && swapMapping[i][0].data[3] == current_pixel.data[3]) {
+
+					newImageData = swapMapping[i][1];
+				}
+			}
+
+			ctx.putImageData(newImageData, x, y);
+		};
+	};
+
+}
 
 
 
 
+/*
 
+	Goals:
+		updateMapping (mapping, originalCanvasID, destinationCanvasID)
+	
 
-
+*/
 
 
 
@@ -159,7 +220,7 @@ function createRGBAMap (canvasID) {
 function fillRGBADiv (rgbaMap, $colorDiv) {
 	var colorDivID = $colorDiv.attr("id");
 	for (i = 0; i < rgbaMap.length; i++) {
-		$colorDiv.append("<div class=" + colorDivID + i + ">" + rgbaMap[i][0] + "</div>");
+		$colorDiv.append("<div class=" + colorDivID + i + ">" + "<img></img>" + "</div>");
 		$("." + colorDivID + i)[0].style.background = rgbaMap[i][0];
 	}
 }
@@ -167,29 +228,18 @@ function fillRGBADiv (rgbaMap, $colorDiv) {
 $("canvas").click(function(){
 	var thisCanvasID = $(this)[0].id;
 	var thisRGBAMap = createRGBAMap(thisCanvasID);
-	var $thisColorDiv = $(this).parent().next(".color_container");
+	var $thisColorDiv = $(this).parent().siblings(".color_container");
 	fillRGBADiv(thisRGBAMap, $thisColorDiv);
+});
+
+$("#canvas2").click(function() {
+	copyCanvas("canvas2", "canvas4");
+	paletteSwap("canvas4", "canvas1");
+
+	currentMapping = createColorMapping(createColorMap("canvas2"), createColorMap("canvas1"));
 });
 
 
 
 
 
-
-function clearCanvas(canvasID) {
-	var canvas = $("#" + canvasID)[0];
-	var ctx = canvas.getContext('2d');
-
-	currentImageData = null;
-
-	for (x = 0; x < 96; x++) {
-		for (y = 0; y < 96; y++) {
-			var current_pixel = ctx.getImageData(x, y, 1, 1)
-			if (currentImageData == null) {
-				currentImageData = current_pixel;
-			} else {
-				ctx.putImageData(currentImageData, x, y);
-			};
-		};
-	};
-}

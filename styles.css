@@ -2,9 +2,15 @@
 	box-sizing: border-box;
 }
 
+.wrapper {
+	display: flex;
+	flex-direction: row;
+}
+
 .canvas_and_colors {
 	display: flex;
 	flex-direction: row;
+	margin: 0 5px;
 }
 
 .canvasDiv {
@@ -14,13 +20,11 @@
 
 .color_container {
 	font-size: 8px;
-	height: 95px;
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+	flex-direction: column;
 }
 
 .color_container div {
-	width: 30%;
-	height: 19px;
+	width: 30px;
+	height: 14px;
 }
