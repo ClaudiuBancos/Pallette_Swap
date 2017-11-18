@@ -1,12 +1,13 @@
 /* JS */
 
-$(document).ready(drawMyImage("BW/83.png", "canvas1"));
-$(document).ready(drawMyImage("BW/48.png", "canvas2"));
+$(document).ready(drawMyImage("BW/26.png", "canvas1"));
+$(document).ready(drawMyImage("BW/7.png", "canvas2"));
 
 
-
-
-
+var colorMap1 = null;
+var colorMap2 = null;
+var currentMapping = null;
+var divsEmpty = true;
 
 
 
@@ -48,39 +49,42 @@ function copyCanvas(srcCanvasID, destCanvasID) {
 }
 
 
-function createColorMap (canvasID) {
+
+function createcolorMap(canvasID) {
 	var canvas = $("#" + canvasID)[0];
 	var ctx = canvas.getContext('2d');
-	var colorMap = [["null", 0]];
+	var colorMap = [["null", "null", 0]];
 
 	for (x = 0; x < 96; x++) {
 		for (y = 0; y < 96; y++) {
 			var current_pixel = ctx.getImageData(x, y, 1, 1)
-			if (colorMap[0][0] == "null") {
-				colorMap[0][0] = current_pixel;
+			var current_data = current_pixel.data;
+			var rgba = 'rgba(' + current_data[0] + ', ' + current_data[1] + ', ' + current_data[2] + ', ' + (current_data[3] / 255) + ')';
+			if (colorMap[0][1] == "null") {
+				colorMap[0][1] = rgba;
 			} else {
 				var match = "no";
 				for (i = 0; i < (colorMap.length); i++) {
-					if (colorMap[i][0].data[0] == current_pixel.data[0] && colorMap[i][0].data[1] == current_pixel.data[1] && colorMap[i][0].data[2] == current_pixel.data[2] && colorMap[i][0].data[3] == current_pixel.data[3]) {
+					if (colorMap[i][1] == rgba) {
 						match = "yes";
-						colorMap[i][1]++;
+						colorMap[i][2]++;
 					}
 				};
 				if (match == "no") {
-					colorMap.push([current_pixel, 1]);
+					colorMap.push([current_pixel, rgba, 1]);
 				}
 			}
 		};
 	};
 
 	for (i = 0; i < (colorMap.length); i++) {
-		if (colorMap[i][0].data[3] == 0) {
+		if (colorMap[i][1] == "rgba(0, 0, 0, 0)") {
 			colorMap.splice(i, 1);
 		}
 	};
 
 	colorMap.sort(function(a,b){
-		return b[1] - a[1];
+		return b[2] - a[2];
 		});
 	
 	return colorMap;
@@ -88,58 +92,39 @@ function createColorMap (canvasID) {
 
 function createColorMapping(colorMap1, colorMap2) {
 	var colorMapping = [];
-	for (i = 0; i < 250; i++) {
+	var max = colorMap1.length + colorMap2.length;
+	for (i = 0; i < max; i++) {
 		if (colorMap1[i] != null && colorMap2[i] != null) {
-			colorMapping[i] = [colorMap1[i][0], colorMap2[i][0]];
+			colorMapping[i]=[i, i];
 		}
 	}
 	return colorMapping;
 }
 
-function testFunction() {
-	var CM1 = createColorMap("canvas1");
-	var CM2 = createColorMap("canvas2");
-	return createColorMapping(CM1, CM2);
+function fillRGBADiv(rgbaMap, $colorDiv) {
+	var colorDivID = $colorDiv.attr("id");
+	for (i = 0; i < rgbaMap.length; i++) {
+		$colorDiv.append("<div class='" + colorDivID + i +" " + "colorBox [" + colorDivID + "][" + i + "]'>" + "<img></img>" + "</div>");
+		$("." + colorDivID + i)[0].style.background = rgbaMap[i][1];
+	}
+	divsEmpty = false;
 }
 
-
-function paletteSwap (receiverCanvasID, donorCanvasID) {
-	var receivingColorMap = createColorMap(receiverCanvasID);
-	var donatingColorMap = createColorMap(donorCanvasID);
-	var swapMapping = createColorMapping(receivingColorMap, donatingColorMap);
-	
-	var receivingCanvas = $("#" + receiverCanvasID)[0];
-	var ctx = receivingCanvas.getContext('2d');
-
-	for (x = 0; x < 96; x++) {
-		for (y = 0; y < 96; y++) {
-			var current_pixel = ctx.getImageData(x, y, 1, 1)
-			
-			var newImageData = current_pixel;
-
-			for (i = 0; i < swapMapping.length; i++) {
-				if (swapMapping[i][0].data[0] == current_pixel.data[0] && swapMapping[i][0].data[1] == current_pixel.data[1] && swapMapping[i][0].data[2] == current_pixel.data[2] && swapMapping[i][0].data[3] == current_pixel.data[3]) {
-
-					newImageData = swapMapping[i][1];
-				}
-			}
-
-			ctx.putImageData(newImageData, x, y);
-		};
-	};
-}
-
-
-var currentMapping = null;
-
-function updateMapping (mapping, originalCanvasID, destinationCanvasID) {
-	
+function updateCanvas (originalCanvasID, destinationCanvasID, colorMap1, colorMap2, colorMapping) {
 	copyCanvas(originalCanvasID, destinationCanvasID);
 
-	var swapMapping = currentMapping;
+	var destCanvas = $("#" + destinationCanvasID)[0];
+	var ctx = destCanvas.getContext('2d');
 
-	var receivingCanvas = $("#" + destinationCanvasID)[0];
-	var ctx = receivingCanvas.getContext('2d');
+	var swapMapping = [];
+
+	for (i = 0; i < colorMapping.length; i++) {
+		var x = colorMapping[i][0];
+		var y = colorMapping[i][1];
+		swapMapping.push([colorMap1[x][0], colorMap2[y][0]])
+	}
+
+	console.log(swapMapping);
 
 	for (x = 0; x < 96; x++) {
 		for (y = 0; y < 96; y++) {
@@ -157,7 +142,6 @@ function updateMapping (mapping, originalCanvasID, destinationCanvasID) {
 			ctx.putImageData(newImageData, x, y);
 		};
 	};
-
 }
 
 
@@ -167,6 +151,8 @@ function updateMapping (mapping, originalCanvasID, destinationCanvasID) {
 
 	Goals:
 		Modify currentMapping, then run updateMapping
+
+		Change "colorMap1" and "colorMap2" to "donorColorMap" and "receiverColorMap" in all cases.
 
 		Make drop downs for sprites
 			Make one drop down
@@ -185,70 +171,17 @@ $(document).on("click", ".colorBox", function(event) {
 });
 
 
-
-
-
-
-function createRGBAMap (canvasID) {
-	var canvas = $("#" + canvasID)[0];
-	var ctx = canvas.getContext('2d');
-	var colorMap = [["null", 0, 0]];
-
-	for (x = 0; x < 96; x++) {
-		for (y = 0; y < 96; y++) {
-			var current_pixel = ctx.getImageData(x, y, 1, 1)
-			var current_data = current_pixel.data;
-			var rgba = 'rgba(' + current_data[0] + ', ' + current_data[1] + ', ' + current_data[2] + ', ' + (current_data[3] / 255) + ')';
-			if (colorMap[0][0] == "null") {
-				colorMap[0][0] = rgba;
-			} else {
-				var match = "no";
-				for (i = 0; i < (colorMap.length); i++) {
-					if (colorMap[i][0] == rgba) {
-						match = "yes";
-						colorMap[i][1]++;
-					}
-				};
-				if (match == "no") {
-					colorMap.push([rgba, 1, current_pixel]);
-				}
-			}
-		};
-	};
-
-	for (i = 0; i < (colorMap.length); i++) {
-		if (colorMap[i][0] == "rgba(0, 0, 0, 0)") {
-			colorMap.splice(i, 1);
-		}
-	};
-
-	colorMap.sort(function(a,b){
-		return b[1] - a[1];
-		});
-	
-	return colorMap;
-}
-
-function fillRGBADiv (rgbaMap, $colorDiv) {
-	var colorDivID = $colorDiv.attr("id");
-	for (i = 0; i < rgbaMap.length; i++) {
-		$colorDiv.append("<div class='" + colorDivID + i +" " + "colorBox [" + colorDivID + "][" + i + "]'>" + "<img></img>" + "</div>");
-		$("." + colorDivID + i)[0].style.background = rgbaMap[i][0];
-	}
-}
-
-
-
 $("#canvas1").click(function() {
-	var RGBAMap1 = createRGBAMap("canvas1");
-	fillRGBADiv(RGBAMap1, $("#0"));
-
-	var RGBAMap2 = createRGBAMap("canvas2");
-	fillRGBADiv(RGBAMap2, $("#1"));
+	colorMap1 = createcolorMap("canvas2");
+	colorMap2 = createcolorMap("canvas1");
+	if (divsEmpty) {
+		fillRGBADiv(colorMap1, $("#0"));
+		fillRGBADiv(colorMap2, $("#1"));
+	}
 
 	copyCanvas("canvas2", "canvas4");
-	currentMapping = createColorMapping(createColorMap("canvas2"), createColorMap("canvas1"));
-	updateMapping(currentMapping, "canvas2", "canvas4");
+	currentMapping = createColorMapping(colorMap1, colorMap2);
+	updateCanvas("canvas2", "canvas4", colorMap1, colorMap2, currentMapping);
 });
 
 
