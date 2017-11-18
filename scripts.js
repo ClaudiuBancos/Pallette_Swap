@@ -166,11 +166,23 @@ function updateMapping (mapping, originalCanvasID, destinationCanvasID) {
 /*
 
 	Goals:
-		updateMapping (mapping, originalCanvasID, destinationCanvasID)
+		Modify currentMapping, then run updateMapping
+
+		Make drop downs for sprites
+			Make one drop down
+			Add a few elements
+			When value is changed, clearCanvas, drawMyImage, updateMapping(createColorMapping)
+			Add more content
 	
 
 */
 
+
+var thisThingy = null;
+$(document).on("click", ".colorBox", function(event) {
+	thisThingy = this;
+	console.log(thisThingy);
+});
 
 
 
@@ -220,25 +232,24 @@ function createRGBAMap (canvasID) {
 function fillRGBADiv (rgbaMap, $colorDiv) {
 	var colorDivID = $colorDiv.attr("id");
 	for (i = 0; i < rgbaMap.length; i++) {
-		$colorDiv.append("<div class=" + colorDivID + i + ">" + "<img></img>" + "</div>");
+		$colorDiv.append("<div class='" + colorDivID + i +" " + "colorBox [" + colorDivID + "][" + i + "]'>" + "<img></img>" + "</div>");
 		$("." + colorDivID + i)[0].style.background = rgbaMap[i][0];
 	}
 }
 
-$("canvas").click(function(){
-	var thisCanvasID = $(this)[0].id;
-	var thisRGBAMap = createRGBAMap(thisCanvasID);
-	var $thisColorDiv = $(this).parent().siblings(".color_container");
-	fillRGBADiv(thisRGBAMap, $thisColorDiv);
-});
 
-$("#canvas2").click(function() {
+
+$("#canvas1").click(function() {
+	var RGBAMap1 = createRGBAMap("canvas1");
+	fillRGBADiv(RGBAMap1, $("#0"));
+
+	var RGBAMap2 = createRGBAMap("canvas2");
+	fillRGBADiv(RGBAMap2, $("#1"));
+
 	copyCanvas("canvas2", "canvas4");
-	paletteSwap("canvas4", "canvas1");
-
 	currentMapping = createColorMapping(createColorMap("canvas2"), createColorMap("canvas1"));
+	updateMapping(currentMapping, "canvas2", "canvas4");
 });
-
 
 
 

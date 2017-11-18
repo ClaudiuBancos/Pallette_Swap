@@ -5,6 +5,7 @@
 .wrapper {
 	display: flex;
 	flex-direction: row;
+	justify-content: center;
 }
 
 .canvas_and_colors {
